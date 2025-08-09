@@ -1,0 +1,78 @@
+# ---- Python bytecode / builds ----
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+*.so
+
+# Distribution / packaging
+.build/
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+
+# ---- Virtual envs / tooling ----
+.venv/
+venv/
+env/
+.python-version  # pyenv
+
+# ---- Dependency/lock artifacts (if you experiment with tools) ----
+pip-wheel-metadata/
+pip-log.txt
+
+# ---- Testing / coverage ----
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.pytest_cache/
+
+# ---- Type check / lint caches ----
+.mypy_cache/
+.pytype/
+.ruff_cache/
+.dmypy.json
+
+# ---- Logs / runtime dumps ----
+*.log
+*.pid
+*.pid.lock
+
+# ---- Environment / secrets ----
+.env
+.env.*
+.envrc
+
+# ---- TLS/PKI (mkcert, self-signed, keys) ----
+*.pem
+*.key
+*.crt
+*.cer
+*.der
+*.pfx
+*.p12
+
+# ---- Editors / OS cruft ----
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.idea/
+.vscode/
+*.iml
+
+# ---- Notebooks (if you tinker) ----
+.ipynb_checkpoints/
+
+# ---- Frontend (only if you later add bundlers) ----
+node_modules/
+.parcel-cache/
+dist/
+.cache/
