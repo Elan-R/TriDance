@@ -6,26 +6,89 @@
     <title>IMU Sender</title>
     <meta http-equiv="Permissions-Policy" content="accelerometer=*, gyroscope=*, magnetometer=*, interest-cohort=()">
     <style>
+      :root { color-scheme: dark; }
       body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 2rem; color: #eaeaea; background: #111; }
-      button { font-size: 1.1rem; padding:.8rem 1rem; border-radius: 12px; border: 1px solid #2b2b2b; background:#1b1b1b; color:#eaeaea }
+      button, a.button {
+        font-size: 1.05rem; padding:.8rem 1rem; border-radius: 12px; border: 1px solid #2b2b2b;
+        background:#1b1b1b; color:#eaeaea; text-decoration: none; display:inline-block;
+      }
       .ok { color: #a8ffb0 }
       .warn { color: #ffd28a }
       .err { color: #ff9090 }
       code { background: #222; padding: .2rem .4rem; border-radius: 6px; }
+      .card { background:#1b1b1b; border:1px solid #2b2b2b; border-radius:14px; padding:1rem; margin:.75rem 0; }
+      details { margin:.5rem 0; }
+      summary { cursor:pointer; }
+      pre { white-space: pre-wrap; word-wrap: break-word; }
+      .muted { color:#bbb; font-size:.95rem; }
     </style>
   </head>
   <body>
     <h2>Phone IMU Sender</h2>
     <div id="status" class="warn">Not started</div>
-    <p>
-      This page will keep your screen awake and stream accelerometer & gyroscope
-      over WebRTC. Tap Start and approve motion permissions.
-    </p>
-    <button id="start">Start</button>
-    <pre id="log"></pre>
+
+    <div class="card">
+      <h3>Step 1 — Trust local HTTPS (one-time)</h3>
+      <p>To enable motion sensors & wake lock on iOS (and avoid warnings elsewhere), install and trust the local CA certificate used by this server.</p>
+      <p>
+        <a class="button" href="/ca/root.cer" download>Download CA certificate (.cer)</a>
+        <a class="button" href="/ca/root.pem" download>Download CA certificate (.pem)</a>
+      </p>
+
+      <details>
+        <summary><b>iPhone / iPad (iOS / iPadOS)</b></summary>
+        <ol>
+          <li>Tap <em>Download CA certificate</em> above (prefer <code>.cer</code>). If prompted, allow download.</li>
+          <li>Open <b>Settings</b> → <b>Profile Downloaded</b> (or <b>Settings → General → VPN &amp; Device Management</b>) → <b>Install</b>.</li>
+          <li>Then go to <b>Settings → General → About → Certificate Trust Settings</b> and enable <b>Full Trust</b> for this certificate.</li>
+          <li>Return to this page and tap <b>Start</b>.</li>
+        </ol>
+        <p class="muted">Tip: If you don’t see “Profile Downloaded”, open the downloaded file from Safari’s downloads list.</p>
+      </details>
+
+      <details>
+        <summary><b>Android (Chrome)</b></summary>
+        <ol>
+          <li>Download the <code>.cer</code> above.</li>
+          <li>Open <b>Settings</b> → <b>Security</b> (or <b>Privacy &amp; Security</b>) → <b>Encryption &amp; credentials</b> → <b>Install a certificate</b> → choose <b>CA certificate</b>.</li>
+          <li>Select the downloaded file and confirm. You may need a screen lock set.</li>
+          <li>Reload this page and tap <b>Start</b>.</li>
+        </ol>
+        <p class="muted">Note: Some apps ignore user CAs, but Chrome honors them for browsing.</p>
+      </details>
+
+      <details>
+        <summary><b>macOS (Safari/Chrome)</b></summary>
+        <ol>
+          <li>Download the <code>.cer</code> file.</li>
+          <li>Double-click it to open in <b>Keychain Access</b>. Choose <b>login</b> (or <b>System</b>) keychain.</li>
+          <li>Find the certificate, double-click, set <b>When using this certificate</b> to <b>Always Trust</b>.</li>
+          <li>Reload this page and tap <b>Start</b>.</li>
+        </ol>
+      </details>
+
+      <details>
+        <summary><b>Windows (Edge/Chrome)</b></summary>
+        <ol>
+          <li>Download the <code>.cer</code> file.</li>
+          <li>Double-click → <b>Install Certificate…</b> → choose <b>Local Machine</b> → store: <b>Trusted Root Certification Authorities</b>.</li>
+          <li>Restart the browser, reload this page, then tap <b>Start</b>.</li>
+        </ol>
+      </details>
+
+      <p class="muted">Only trust certificates you created yourself on a machine you control.</p>
+    </div>
+
+    <div class="card">
+      <h3>Step 2 — Stream IMU</h3>
+      <p>This page will keep your screen awake and stream accelerometer &amp; gyroscope over WebRTC.</p>
+      <button id="start">Start</button>
+      <pre id="log"></pre>
+    </div>
 
     <script>
-      const SERVER_BASE = "{{ server_base }}";
+      // Use relative URLs so HTTPS/WSS are automatic.
+      const SERVER_BASE = "";
     </script>
     <script src="/static/sender.js"></script>
   </body>
