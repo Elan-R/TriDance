@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>IMU Sender</title>
+    <meta http-equiv="Permissions-Policy" content="accelerometer=*, gyroscope=*, magnetometer=*, interest-cohort=()">
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 2rem; color: #eaeaea; background: #111; }
+      button { font-size: 1.1rem; padding:.8rem 1rem; border-radius: 12px; border: 1px solid #2b2b2b; background:#1b1b1b; color:#eaeaea }
+      .ok { color: #a8ffb0 }
+      .warn { color: #ffd28a }
+      .err { color: #ff9090 }
+      code { background: #222; padding: .2rem .4rem; border-radius: 6px; }
+    </style>
+  </head>
+  <body>
+    <h2>Phone IMU Sender</h2>
+    <div id="status" class="warn">Not started</div>
+    <p>
+      This page will keep your screen awake and stream accelerometer & gyroscope
+      over WebRTC. Tap Start and approve motion permissions.
+    </p>
+    <button id="start">Start</button>
+    <pre id="log"></pre>
+
+    <script>
+      const SERVER_BASE = "{{ server_base }}";
+    </script>
+    <script src="/static/sender.js"></script>
+  </body>
+</html>
