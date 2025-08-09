@@ -3,6 +3,7 @@ import base64
 import json
 import os
 import socket
+import struct
 import uuid
 import webbrowser
 import subprocess
@@ -182,6 +183,10 @@ async def webrtc_offer(payload: dict = Body(...)):
     """
     Expected payload: { "sdp": "...", "type": "offer", "label": "...", "ice": "none|stun" }
     The phone is the offerer and creates a DataChannel named "imu".
+
+    Binary packet layout from sender.js (little-endian, 36 bytes):
+      [u8 version=1][u8 flags=0][u16 seq][f64 ts_ms]
+      [f32 ax][f32 ay][f32 az][f32 gx][f32 gy][f32 gz]
     """
     sdp = payload["sdp"]
     sdp_type = payload["type"]
@@ -201,22 +206,40 @@ async def webrtc_offer(payload: dict = Body(...)):
         def on_message(message):
             if isinstance(message, bytes):
                 peer.samples_received += 1
+
+                # Parse 36-byte little-endian packet if possible
+                ax = ay = az = gx = gy = gz = None
+                ts_ms = None
+                seq = None
+                try:
+                    if len(message) >= 36:
+                        version, flags, seq, ts_ms, ax, ay, az, gx, gy, gz = struct.unpack(
+                            "<BBH d f f f f f f".replace(" ", ""), message[:36]
+                        )
+                except Exception:
+                    # leave fields as None on parse failure
+                    pass
+
                 data = {
                     "kind": "sample",
                     "peerId": peer.id,
                     "label": peer.device_label,
-                    "bytes": len(message),
                     "count": peer.samples_received,
-                    "buffer": channel.bufferedAmount,
+                    "seq": seq,
+                    "ts": ts_ms,       # milliseconds since epoch (float)
+                    "ax": ax, "ay": ay, "az": az,   # m/s^2
+                    "gx": gx, "gy": gy, "gz": gz,   # rad/s
                 }
                 spawn(broadcast(data))
             else:
+                # JSON/text control messages (e.g., hello/ping)
                 try:
                     obj = json.loads(message)
                 except Exception:
                     obj = {"text": message}
                 obj["kind"] = obj.get("kind", "msg")
                 obj["peerId"] = peer.id
+                obj.setdefault("label", peer.device_label)
                 spawn(broadcast(obj))
 
         @channel.on("close")
@@ -244,7 +267,6 @@ async def remove_peer(peer_id: str):
     try:
         await peer.pc.close()
     except asyncio.CancelledError:
-        # Allow clean cancellation during shutdown
         return
     except Exception:
         pass
@@ -286,8 +308,7 @@ async def ws_dashboard(ws: WebSocket):
     )
     try:
         while True:
-            # Keep alive; we don't use inbound messages yet
-            await ws.receive_text()
+            await ws.receive_text()  # keep alive
     except WebSocketDisconnect:
         dashboards.discard(ws)
     except Exception:
@@ -347,5 +368,5 @@ if __name__ == "__main__":
         ssl_certfile=TLS_CERT,
         ssl_keyfile=TLS_KEY,
         reload=False,
-        timeout_graceful_shutdown=5,  # give the shutdown hook a moment to run
+        timeout_graceful_shutdown=5,
     )
